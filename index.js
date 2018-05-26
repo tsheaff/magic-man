@@ -66,14 +66,14 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
   });
 };
 
-const sendMessageToCohort = (message, cohort, done) => {
+const sendMessageToCohort = (cohort, message, mediaURL, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Sending Message: ', err);
       return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
     async.each(phoneNumbers, (phoneNumber, done) => {
-      sendTwilioMessage(message, phoneNumber, process.env.TWILIO_PHONE_NUMBER, done);
+      sendTwilioMessage(message, mediaURL, phoneNumber, process.env.TWILIO_PHONE_NUMBER, done);
     }, (twilioSendErr) => {
       if (twilioSendErr) {
         return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
@@ -140,7 +140,7 @@ const getCohortPhoneNumbers = (cohort, done) => {
   });
 };
 
-const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
+const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   if (!fullMessage || !phoneNumber) {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
@@ -180,7 +180,8 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
   if (adminCommand === 'send') {
     const message = words.join(' ');
     console.log('message is', message);
-    return sendMessageToCohort(message, cohort, done);
+    console.log('url is ', mediaURL);
+    return sendMessageToCohort(cohort, message, mediaURL, done);
   }
   if (adminCommand === 'list') {
     return listCohort(cohort, done);
@@ -194,11 +195,12 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
   return done('You gave MAGIC MAN an invalid command. Valid commands are "send", "list", "count" and "delete"');
 };
 
-const sendTwilioMessage = (message, toPhoneNumber, fromPhoneNumber, done) => {
+const sendTwilioMessage = (message, mediaURL, toPhoneNumber, fromPhoneNumber, done) => {
   twilioClient.messages.create({
-    body: message,
-    to: toPhoneNumber,
-    from: fromPhoneNumber,
+    Body: message,
+    To: toPhoneNumber,
+    From: fromPhoneNumber,
+    MediaUrl: mediaURL,
   }).then((message) => {
     console.log('Sent Twilio Message', message);
     done();
@@ -214,8 +216,9 @@ app.post('/twilio/webook', (req, res) => {
   const message = req.body.Body;
   const fromPhoneNumber = req.body.From;
   const toPhoneNumber = req.body.To;
-  executeTwilioMessage(message, fromPhoneNumber, (response) => {
-    sendTwilioMessage(response, fromPhoneNumber, toPhoneNumber, () => {
+  const mediaURL = req.body.MediaUrl0;
+  executeTwilioMessage(message, fromPhoneNumber, mediaURL, (response) => {
+    sendTwilioMessage(response, undefined, fromPhoneNumber, toPhoneNumber, () => {
       res.status(200);
       res.json({});
     });
@@ -225,7 +228,8 @@ app.post('/twilio/webook', (req, res) => {
 app.post('/twilio/test', (req, res) => {
   const message = req.body.message;
   const phoneNumber = req.body.phone_number;
-  executeTwilioMessage(message, phoneNumber, (response) => {
+  const mediaURL = req.body.media_url;
+  executeTwilioMessage(message, phoneNumber, mediaURL, (response) => {
     res.send(response);
   })
 });

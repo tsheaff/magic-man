@@ -180,7 +180,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
   console.log('cohortIsValid is', cohortIsValid);
   console.log('includes period is', _.includes(cohort, '.'));
   if (!cohortIsValid) {
-    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "all" or like "YYYY.MM.DD" for example "2018.05.09"`);
+    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must be either "all" or "YYYY.MM.DD" e.g. "2018.05.09"`);
   }
 
   if (adminCommand === 'send') {

@@ -124,7 +124,7 @@ const deleteCohort = (cohort, done) => {
 };
 
 const cohortSequelizeOptions = (cohort) => {
-  if (cohort === 'ALL') {
+  if (cohort === 'all') {
     return;
   }
   return { where: { cohort: cohort } };
@@ -145,8 +145,8 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
   const words = fullMessage.split(' ');
-  const firstWord = words.shift();
-  const isAdminMessage = firstWord === 'COMMAND';
+  const firstWord = _.lowerCase(words.shift());
+  const isAdminMessage = firstWord === 'command';
   if (!isAdminMessage) {
     const lowerCaseMessage = _.lowerCase(fullMessage.trim());
     const isEnrollmentConfirmation = _.includes(CONFIG.VALID_ENROLLMENTS, lowerCaseMessage);
@@ -156,34 +156,34 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
     return done(CONFIG.INTRO);
   }
 
-  const adminCommand = words.shift();
+  const adminCommand = _.lowerCase(words.shift());
   if (!adminCommand) {
-    return done('Please give MAGIC MAN a valid command. For example "COMMAND COUNT 2018-05-09"');
+    return done('Please give MAGIC MAN a valid command. For example "command count 2018-05-09"');
   }
 
-  const cohort = words.shift();
+  const cohort = _.lowerCase(words.shift());
   if (!cohort) {
-    return done('Please give MAGIC MAN a valid command. For example "COMMAND COUNT 2018-05-09"');
+    return done('Please give MAGIC MAN a valid command. For example "command count 2018-05-09"');
   }
-  const cohortIsValid = cohort === 'ALL' || cohort.match(/\d\d\d\d-\d\d-\d\d/);
+  const cohortIsValid = cohort === 'all' || cohort.match(/\d\d\d\d-\d\d-\d\d/);
   if (!cohortIsValid) {
-    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"`);
+    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "all" or like "YYYY-MM-DD" for example "2018-05-09"`);
   }
 
-  if (adminCommand === 'SEND') {
+  if (adminCommand === 'send') {
     const message = words.join(' ');
     return sendMessageToCohort(message, cohort, done);
   }
-  if (adminCommand === 'LIST') {
+  if (adminCommand === 'list') {
     return listCohort(cohort, done);
   }
-  if (adminCommand === 'COUNT') {
+  if (adminCommand === 'count') {
     return countCohort(cohort, done);
   }
-  if (adminCommand === 'DELETE') {
+  if (adminCommand === 'delete') {
     return deleteCohort(cohort, done);
   }
-  return done('You gave MAGIC MAN an invalid command. Valid commands are SEND, LIST, COUNT and DELETE');
+  return done('You gave MAGIC MAN an invalid command. Valid commands are "send", "list", "count" and "delete"');
 };
 
 const sendTwilioMessage = (message, toPhoneNumber, fromPhoneNumber, done) => {

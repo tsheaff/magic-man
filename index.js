@@ -162,6 +162,12 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   }
   adminCommand = adminCommand.toLowerCase().trim();
 
+  const validCommandPhoneNumbers = process.env.COMMAND_NUMBERS.split(',');
+  const hasCommandAuth = _.includes(phoneNumber, validCommandPhoneNumbers);
+  if (!hasCommandAuth) {
+    return done('You do not have the power to command MAGIC MAN. Sacrifice a goat and he may elevate your privileges 🙏');
+  }
+
   let cohort = words.shift();
   if (!cohort) {
     return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');

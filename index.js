@@ -135,7 +135,10 @@ const getCohortPhoneNumbers = (cohort, done) => {
   });
 };
 
-const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
+const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
+  if (!fullMessage || !phoneNumber) {
+    return done(CONFIG.ENROLLMENT_ERROR);
+  }
   const words = fullMessage.split(' ');
   const firstWord = words.shift();
   const isAdminMessage = firstWord === 'COMMAND';
@@ -143,7 +146,7 @@ const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
     const lowerCaseMessage = _.lowerCase(fullMessage.trim());
     const isEnrollmentConfirmation = _.includes(CONFIG.VALID_ENROLLMENTS, lowerCaseMessage);
     if (isEnrollmentConfirmation) {
-      return enrollPersonInTodaysCohort(senderPhoneNumber, done);
+      return enrollPersonInTodaysCohort(phoneNumber, done);
     }
     return done(CONFIG.INTRO);
   }
@@ -180,17 +183,18 @@ const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
 
 // endpoints
 app.post('/twilio/webook', (req, res) => {
+  console.log('twilio webhook body', req.body);
   const message = req.body.message;
-  const senderPhoneNumber = req.body.sender_phone_number;
-  executeTwilioMessage(message, senderPhoneNumber, (response) => {
-    twilio.send(response, senderPhoneNumber);
+  const phoneNumber = req.body.phone_number;
+  executeTwilioMessage(message, phoneNumber, (response) => {
+    twilio.send(response, phoneNumber);
   })
 });
 
 app.post('/twilio/test', (req, res) => {
   const message = req.body.message;
-  const senderPhoneNumber = req.body.phone_number;
-  executeTwilioMessage(message, senderPhoneNumber, (response) => {
+  const phoneNumber = req.body.phone_number;
+  executeTwilioMessage(message, phoneNumber, (response) => {
     res.json({ response: response });
   })
 });

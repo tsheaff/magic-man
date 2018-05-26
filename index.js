@@ -31,7 +31,7 @@ _.forEach(models, (model) => {
   model.init(model.fields(), {
     sequelize: dbConnection,
     tableName: model.tableName(),
-    paranoid: true,
+    paranoid: false,
   });
   model.sync();
 });

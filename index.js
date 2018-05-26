@@ -50,7 +50,7 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
     phone_number: phoneNumber,
     cohort: cohort,
   }).then((result) => {
-    done();
+    done(CONGIF.ENROLLMENT_SUCCESS);
   }).catch((err) => {
     console.log('Error Creating Person: ', err);
     done(CONFIG.ENROLLMENT_ERROR);

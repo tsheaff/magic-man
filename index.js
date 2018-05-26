@@ -179,7 +179,7 @@ const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
 };
 
 // endpoints
-app.get('/twilio/webook', (req, res) => {
+app.post('/twilio/webook', (req, res) => {
   const message = req.body.message;
   const senderPhoneNumber = req.body.sender_phone_number;
   executeTwilioMessage(message, senderPhoneNumber, (response) => {

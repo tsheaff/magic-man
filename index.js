@@ -50,7 +50,7 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
 
-  const cohort = moment().tz('America/Los_Angeles').format('YYYY-MM-DD');
+  const cohort = moment().tz('America/Los_Angeles').format('YYYY.MM.DD');
   Person.find({ where: {
     phone_number: phoneNumber,
     cohort: cohort
@@ -158,16 +158,16 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
 
   const adminCommand = _.lowerCase(words.shift());
   if (!adminCommand) {
-    return done('Please give MAGIC MAN a valid command. For example "command count 2018-05-09"');
+    return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');
   }
 
   const cohort = _.lowerCase(words.shift());
   if (!cohort) {
-    return done('Please give MAGIC MAN a valid command. For example "command count 2018-05-09"');
+    return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');
   }
-  const cohortIsValid = cohort === 'all' || cohort.match(/\d\d\d\d-\d\d-\d\d/);
+  const cohortIsValid = cohort === 'all' || cohort.match(/\d\d\d\d\.\d\d\.\d\d/);
   if (!cohortIsValid) {
-    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "all" or like "YYYY-MM-DD" for example "2018-05-09"`);
+    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "all" or like "YYYY.MM.DD" for example "2018.05.09"`);
   }
 
   if (adminCommand === 'send') {

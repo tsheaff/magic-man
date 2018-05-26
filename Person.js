@@ -17,7 +17,7 @@ class Person extends Sequelize.Model {
         unique: 'phone_number_cohort_index',
       },
       cohort: {
-        type: DataTypes.TEXT, // formatted like YYYY-MM-DD
+        type: DataTypes.TEXT, // formatted like YYYY.MM.DD
         unique: 'phone_number_cohort_index',
       },
     };

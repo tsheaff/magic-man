@@ -64,7 +64,7 @@ const sendMessageToCohort = (message, cohort, done) => {
       return done('There was some sort of problem sending your message to cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
     }
     // TODO: twilio message send loop
-    done('Your message was sent to ' + _.size(people) + ' people in cohort ' + cohort);
+    done('Your message was sent to ' + _.size(phoneNumbers) + ' people in cohort ' + cohort);
   });
 };
 
@@ -84,14 +84,14 @@ const countCohort = (cohort, done) => {
       console.log('Error Counting Cohort: ', err);
       return done('There was some sort of problem counting cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
     }
-    done('There are' + _.size(people) + ' people in cohort ' + cohort);
+    done('There are' + _.size(phoneNumbers) + ' people in cohort ' + cohort);
   });
 };
 
 const deleteCohort = (cohort, done) => {
   const cohortOptions = cohortSequelizeOptions(cohort);
-  Person.destroy(cohortOptions).then((people) => {
-    done('All' + _.size(people) + ' people in cohort ' + cohort + ' have been deleted');
+  Person.destroy(cohortOptions).then((numDestroyed) => {
+    done('All' + numDestroyed + ' people in cohort ' + cohort + ' have been deleted');
   }).catch((err) => {
     console.log('Error Deleting Cohort: ', err);
     done('There was some sort of problem deleting cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);

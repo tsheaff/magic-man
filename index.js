@@ -11,7 +11,7 @@ const CONFIG = require('./config');
 // create sequelize models
 const Person = require('./Person');
 
-const databaseURL = process.env.DATABASE_URL || 'postgres://tsheaff:admin@localhost/calmapi_test';
+const databaseURL = process.env.DATABASE_URL;
 const dbConnection = new Sequelize(databaseURL, {
   logging: console.log,
   define: {

@@ -150,7 +150,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   if (!isAdminMessage) {
     const lowerCaseMessage = fullMessage.toLowerCase().trim();
     const validEnrollments = CONFIG.VALID_ENROLLMENTS.split(',');
-    const isEnrollmentConfirmation = _.includes(CONFIG.VALID_ENROLLMENTS, lowerCaseMessage);
+    const isEnrollmentConfirmation = _.includes(validEnrollments, lowerCaseMessage);
     if (isEnrollmentConfirmation) {
       return enrollPersonInTodaysCohort(phoneNumber, done);
     }

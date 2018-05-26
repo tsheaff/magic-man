@@ -192,10 +192,10 @@ const sendTwilioMessage = (message, toPhoneNumber, fromPhoneNumber, done) => {
     to: toPhoneNumber,
     from: fromPhoneNumber,
   }).then((message) => {
-    console.log('Sent Twilio Message': message);
+    console.log('Sent Twilio Message', message);
     done();
   }).catch((err) => {
-    console.log('Error Sending Twilio Message': err);
+    console.log('Error Sending Twilio Message', err);
     done(err);
   });
 };

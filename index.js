@@ -45,14 +45,26 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
   }
 
   const cohort = moment().tz('America/Los_Angeles').format('YYYY-MM-DD');
-  Person.create({
-    id: shortid.generate(),
+  Person.find({ where: {
     phone_number: phoneNumber,
-    cohort: cohort,
-  }).then((result) => {
-    done(CONFIG.ENROLLMENT_SUCCESS);
+    cohort: cohort
+  }}).then((person) => {
+    if (person) {
+      return done(CONFIG.ALREADY_ENROLLED);
+    }
+
+    Person.create({
+      id: shortid.generate(),
+      phone_number: phoneNumber,
+      cohort: cohort,
+    }).then((result) => {
+      done(CONFIG.ENROLLMENT_SUCCESS);
+    }).catch((err) => {
+      console.log('Error Creating Person: ', err);
+      done(CONFIG.ENROLLMENT_ERROR);
+    });
   }).catch((err) => {
-    console.log('Error Creating Person: ', err);
+    console.log('Error Finding Person: ', err);
     done(CONFIG.ENROLLMENT_ERROR);
   });
 };

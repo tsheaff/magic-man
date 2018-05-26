@@ -120,8 +120,13 @@ const countCohort = (cohort, done) => {
 };
 
 const deleteCohort = (cohort, done) => {
-  const cohortOptions = cohortSequelizeOptions(cohort);
-  Person.destroy(cohortOptions).then((numDestroyed) => {
+  const options = (() => {
+    if (cohort === 'all') {
+      return { truncate: true };
+    }
+    return { where: { cohort: cohort } };
+  })();
+  Person.destroy(options).then((numDestroyed) => {
     done(`All ${numDestroyed} people in cohort ${cohort} have been deleted`);
   }).catch((err) => {
     console.log('Error Deleting Cohort: ', err);
@@ -129,16 +134,14 @@ const deleteCohort = (cohort, done) => {
   });
 };
 
-const cohortSequelizeOptions = (cohort) => {
-  if (cohort === 'all') {
-    return;
-  }
-  return { where: { cohort: cohort } };
-}
-
 const getCohortPhoneNumbers = (cohort, done) => {
-  const cohortOptions = cohortSequelizeOptions(cohort);
-  Person.findAll(cohortOptions).then((people) => {
+  const options = (() => {
+    if (cohort === 'all') {
+      return;
+    }
+    return { where: { cohort: cohort } };
+  })();
+  Person.findAll(options).then((people) => {
     const phoneNumbers = _.sortBy(_.map(people, 'phone_number'));
     done(null, phoneNumbers);
   }).catch((err) => {

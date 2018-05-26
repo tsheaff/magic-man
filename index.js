@@ -51,26 +51,17 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
   }
 
   const cohort = moment().tz('America/Los_Angeles').format('YYYY.MM.DD');
-  Person.find({ where: {
+  Person.create({
+    id: shortid.generate(),
     phone_number: phoneNumber,
-    cohort: cohort
-  }}).then((person) => {
-    if (person) {
+    cohort: cohort,
+  }).then((result) => {
+    done(CONFIG.ENROLLMENT_SUCCESS);
+  }).catch((err) => {
+    if (err.name === 'SequelizeUniqueConstraintError') {
       return done(CONFIG.ALREADY_ENROLLED);
     }
-
-    Person.create({
-      id: shortid.generate(),
-      phone_number: phoneNumber,
-      cohort: cohort,
-    }).then((result) => {
-      done(CONFIG.ENROLLMENT_SUCCESS);
-    }).catch((err) => {
-      console.log('Error Creating Person: ', err);
-      done(CONFIG.ENROLLMENT_ERROR);
-    });
-  }).catch((err) => {
-    console.log('Error Finding Person: ', err);
+    console.log('Error Creating Person: ', err);
     done(CONFIG.ENROLLMENT_ERROR);
   });
 };

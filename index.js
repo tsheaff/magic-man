@@ -60,7 +60,7 @@ const sendMessageToCohort = (message, cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Sending Message: ', err);
-      return done('There was some sort of problem sending your message to cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
+      return done('There was some sort of problem sending your message to cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
     }
     // TODO: twilio message send loop
     done('Your message was sent to ' + _.size(people) + ' people in cohort ' + cohort);
@@ -71,7 +71,7 @@ const listCohort = (cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Listing Cohort: ', err);
-      return done('There was some sort of problem listing cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
+      return done('There was some sort of problem listing cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
     }
     done('These are the members in cohort ' + cohort + ':\n' + phoneNumbers.join('\n'));
   });
@@ -81,7 +81,7 @@ const countCohort = (cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Counting Cohort: ', err);
-      return done('There was some sort of problem counting cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
+      return done('There was some sort of problem counting cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
     }
     done('There are' + _.size(people) + ' people in cohort ' + cohort);
   });
@@ -93,7 +93,7 @@ const deleteCohort = (cohort, done) => {
     done('All' + _.size(people) + ' people in cohort ' + cohort + ' have been deleted');
   }).catch((err) => {
     console.log('Error Deleting Cohort: ', err);
-    done('There was some sort of problem deleting cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
+    done('There was some sort of problem deleting cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
   });
 };
 

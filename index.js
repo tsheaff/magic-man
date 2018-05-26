@@ -153,7 +153,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
     if (isEnrollmentConfirmation) {
       return enrollPersonInTodaysCohort(phoneNumber, done);
     }
-    return done(CONFIG.INTRO);
+    return done(); // no message in this case
   }
 
   let adminCommand = words.shift();
@@ -226,12 +226,18 @@ app.post('/twilio/webook', (req, res) => {
     from: fromPhoneNumber,
     mediaURL: mediaURL,
   });
+  const succeed = () => {
+    res.status(200);
+    res.json({});
+  };
   executeTwilioMessage(message, fromPhoneNumber, mediaURL, (response) => {
+    if (!response) {
+      return succeed();
+    }
     sendTwilioMessage(response, undefined, fromPhoneNumber, toPhoneNumber, () => {
-      res.status(200);
-      res.json({});
+      succeed();
     });
-  })
+  });
 });
 
 app.post('/twilio/test', (req, res) => {

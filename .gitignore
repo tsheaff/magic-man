@@ -1,0 +1,15 @@
+logs
+*.log
+NEW_RELIC_LOG
+.DS_Store
+build
+node_modules
+s3/*
+assets/*
+.idea
+.vscode
+export_vars.sh
+docker-compose.override.yml
+config/kube/generated/*
+last-sync.timestamp
+docker-compose.override.yaml

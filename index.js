@@ -17,6 +17,7 @@ const dbConnection = new Sequelize(databaseURL, {
   define: {
     updatedAt: 'updated_at',
     createdAt: 'created_at',
+    deletedAt: 'deleted_at',
   },
 });
 

@@ -128,10 +128,17 @@ const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
   }
 
   const adminCommand = words.shift();
+  if (!adminCommand) {
+    return done('Please give MAGIC MAN a valid command. For example "COMMAND COUNT 2018-05-09"');
+  }
+
   const cohort = words.shift();
+  if (!cohort) {
+    return done('Please give MAGIC MAN a valid command. For example "COMMAND COUNT 2018-05-09"');
+  }
   const cohortIsValid = cohort === 'ALL' || cohort.match(/\d\d\d\d-\d\d-\d\d/);
   if (!cohortIsValid) {
-    return done('Invalid cohort "' + cohort + '". Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"');
+    return done('Please give MAGIC MAN a valid cohort. "' + cohort + '" is invalid. Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"');
   }
 
   if (adminCommand === 'SEND') {

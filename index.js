@@ -166,7 +166,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   const validCommandPhoneNumbers = process.env.COMMAND_NUMBERS.split(',');
   console.log('validCommandPhoneNumbers', validCommandPhoneNumbers);
   console.log('phoneNumber', phoneNumber);
-  const hasCommandAuth = _.includes(phoneNumber, validCommandPhoneNumbers);
+  const hasCommandAuth = _.includes(validCommandPhoneNumbers, phoneNumber);
   console.log('hasCommandAuth', hasCommandAuth);
   if (!hasCommandAuth) {
     return done('You do not have the power to command MAGIC MAN. Sacrifice a goat and he may elevate your privileges 🙏');

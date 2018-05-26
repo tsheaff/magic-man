@@ -6,10 +6,10 @@ const _ = require('lodash');
 const async = require('async');
 const shortid = require('shortid');
 const moment = require('moment-timezone');
+const CONFIG = require('./config');
 
 // create sequelize models
 const Person = require('./Person');
-const Message = require('./Message');
 
 const databaseURL = process.env.DATABASE_URL || 'postgres://tsheaff:admin@localhost/calmapi_test';
 const dbConnection = new Sequelize(databaseURL, {
@@ -20,7 +20,7 @@ const dbConnection = new Sequelize(databaseURL, {
   },
 });
 
-const models = [ Person, Message ];
+const models = [ Person ];
 _.forEach(models, (model) => {
   model.init(model.fields(), {
     sequelize: dbConnection,
@@ -39,7 +39,8 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 // message helpers
 const enrollPersonInTodaysCohort = (phoneNumber, done) => {
   if (!phoneNumber) {
-    return done('no phone number');
+    console.log('Error Creating Person: no phone number');
+    return done(CONFIG.ENROLLMENT_ERROR);
   }
 
   const cohort = moment().tz('America/Los_Angeles').format('YYYY-MM-DD');
@@ -48,32 +49,17 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
     phone_number: phoneNumber,
     cohort: cohort,
   }).then((result) => {
-    const fallbackIntroMessage = 'Thanks for participating in MAGIC MAN. After the illusion is complete, your phone number will be deleted from our servers.';
-    Message.findById('intro').then((introMessage) => {
-      done(introMessage || fallbackIntroMessage);
-    }).catch(() => {
-      done(fallbackIntroMessage);
-    });
+    done();
   }).catch((err) => {
-    console.log('error creating person', err);
-    done('There was some sort of problem enrolling you in MAGIC MAN. Tell Kevin to get his shit together 💩');
-  });
-};
-
-const changeIntroMessage = (introMessage, done) => {
-  Message.upsert({
-    type: 'intro',
-    message: introMessage,
-  }).then((result) => {
-    done('Success, Intro Message is now "' + introMessage + '"');
-  }).catch((error) => {
-    done('There was some sort of problem updating the Intro Message. Tell Tyler to get his shit together 💩');
+    console.log('Error Creating Person: ', err);
+    done(CONFIG.ENROLLMENT_ERROR);
   });
 };
 
 const sendMessageToCohort = (message, cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
+      console.log('Error Sending Message: ', err);
       return done('There was some sort of problem sending your message to cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
     }
     // TODO: twilio message send loop
@@ -84,6 +70,7 @@ const sendMessageToCohort = (message, cohort, done) => {
 const listCohort = (cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
+      console.log('Error Listing Cohort: ', err);
       return done('There was some sort of problem listing cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
     }
     done('These are the members in cohort ' + cohort + ':\n' + phoneNumbers.join('\n'));
@@ -93,6 +80,7 @@ const listCohort = (cohort, done) => {
 const countCohort = (cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
+      console.log('Error Counting Cohort: ', err);
       return done('There was some sort of problem counting cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
     }
     done('There are' + _.size(people) + ' people in cohort ' + cohort);
@@ -103,7 +91,8 @@ const deleteCohort = (cohort, done) => {
   const cohortOptions = cohortSequelizeOptions(cohort);
   Person.destroy(cohortOptions).then((people) => {
     done('All' + _.size(people) + ' people in cohort ' + cohort + ' have been deleted');
-  }).catch((error) => {
+  }).catch((err) => {
+    console.log('Error Deleting Cohort: ', err);
     done('There was some sort of problem deleting cohort ' + cohort + '. Tell Tyler to get his shit together 💩');
   });
 };
@@ -120,35 +109,29 @@ const getCohortPhoneNumbers = (cohort, done) => {
   Person.findAll(cohortOptions).then((people) => {
     const phoneNumbers = _.sortBy(_.map(people, 'phone_number'));
     done(null, phoneNumbers);
-  }).catch((error) => {
-    done(error);
+  }).catch((err) => {
+    done(err);
   });
 };
 
 const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
-  console.log('inside executeTwilioMessage', fullMessage, senderPhoneNumber);
   const words = fullMessage.split(' ');
-  console.log('words', words);
   const firstWord = words.shift();
-  console.log('firstWord', firstWord);
   const isAdminMessage = firstWord === 'COMMAND';
-  console.log('isAdminMessage', isAdminMessage);
   if (!isAdminMessage) {
-    console.log('  IS NOT ADMIN MESSAGE, ENROLLING', senderPhoneNumber);
-    return enrollPersonInTodaysCohort(senderPhoneNumber, done);
+    const lowerCaseMessage = _.lowerCase(fullMessage.trim());
+    const isEnrollmentConfirmation = _.includes(CONFIG.VALID_ENROLLMENTS, lowerCaseMessage);
+    if (isEnrollmentConfirmation) {
+      return enrollPersonInTodaysCohort(senderPhoneNumber, done);
+    }
+    return done(CONFIG.INTRO);
   }
 
   const adminCommand = words.shift();
-  console.log('adminCommand', adminCommand);
-  if (adminCommand === 'CHANGE-INTRO') {
-    const message = words.join(' ');
-    return changeIntroMessage(message, done);
-  }
-
   const cohort = words.shift();
   const cohortIsValid = cohort === 'ALL' || cohort.match(/\d\d\d\d-\d\d-\d\d/);
   if (!cohortIsValid) {
-    return done('invalid cohort "' + cohort + '". Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"');
+    return done('Invalid cohort "' + cohort + '". Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"');
   }
 
   if (adminCommand === 'SEND') {
@@ -164,7 +147,7 @@ const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
   if (adminCommand === 'DELETE') {
     return deleteCohort(cohort, done);
   }
-  return done('invalid command');
+  return done('You gave MAGIC MAN an invalid command. Valid commands are SEND, LIST, COUNT and DELETE');
 };
 
 // endpoints

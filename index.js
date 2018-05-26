@@ -152,10 +152,10 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
   }
   const words = fullMessage.split(' ');
   console.log('words is', words);
-  const firstWord = _.lowerCase(words.shift());
+  const firstWord = words.shift().toLowerCase().trim();
   const isAdminMessage = firstWord === 'command';
   if (!isAdminMessage) {
-    const lowerCaseMessage = _.lowerCase(fullMessage.trim());
+    const lowerCaseMessage = fullMessage.toLowerCase().trim();
     const isEnrollmentConfirmation = _.includes(CONFIG.VALID_ENROLLMENTS, lowerCaseMessage);
     if (isEnrollmentConfirmation) {
       return enrollPersonInTodaysCohort(phoneNumber, done);
@@ -163,16 +163,19 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
     return done(CONFIG.INTRO);
   }
 
-  const adminCommand = _.lowerCase(words.shift());
+  let adminCommand = words.shift();
   if (!adminCommand) {
     return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');
   }
+  adminCommand = adminCommand.toLowerCase().trim();
 
-  const cohort = _.lowerCase(words.shift());
+  let cohort = words.shift();
   console.log('cohort is', cohort);
   if (!cohort) {
     return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');
   }
+  cohort = cohort.toLowerCase().trim();
+  console.log('cohort is', cohort);
   const cohortIsValid = cohort === 'all' || cohort.match(/\d\d\d\d\.\d\d\.\d\d/);
   console.log('cohortIsValid is', cohortIsValid);
   console.log('includes period is', _.includes(cohort, '.'));

@@ -24,11 +24,6 @@ Example Commands:
 `command count 2018.05.25`
 
 
-## change the intro message
-
-`command change-intro This is the new message to send to new people when they are added to a cohort`
-
-
 ## delete a cohort
 
 `command delete 2018.05.25`

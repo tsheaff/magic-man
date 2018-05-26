@@ -197,10 +197,10 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
 
 const sendTwilioMessage = (message, mediaURL, toPhoneNumber, fromPhoneNumber, done) => {
   twilioClient.messages.create({
-    Body: message,
-    To: toPhoneNumber,
-    From: fromPhoneNumber,
-    MediaUrl: mediaURL,
+    body: message,
+    to: toPhoneNumber,
+    from: fromPhoneNumber,
+    mediaUrl: mediaURL,
   }).then((message) => {
     console.log('Sent Twilio Message', message);
     done();

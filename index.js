@@ -8,6 +8,11 @@ const shortid = require('shortid');
 const moment = require('moment-timezone');
 const CONFIG = require('./config');
 
+// create twilio client
+var TwilioSID = process.env.TWILIO_SID;
+var TwilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+var twilioClient = new twilio(TwilioSID, TwilioAuthToken);
+
 // create sequelize models
 const Person = require('./Person');
 
@@ -181,13 +186,31 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
   return done('You gave MAGIC MAN an invalid command. Valid commands are SEND, LIST, COUNT and DELETE');
 };
 
+const sendTwilioMessage = (message, toPhoneNumber, fromPhoneNumber, done) => {
+  twilioClient.messages.create({
+    body: message,
+    to: toPhoneNumber,
+    from: fromPhoneNumber,
+  }).then((message) => {
+    console.log('Sent Twilio Message': message);
+    done();
+  }).catch((err) => {
+    console.log('Error Sending Twilio Message': err);
+    done(err);
+  });
+};
+
 // endpoints
 app.post('/twilio/webook', (req, res) => {
   console.log('twilio webhook body', req.body);
-  const message = req.body.message;
-  const phoneNumber = req.body.phone_number;
+  const message = req.body.Body;
+  const fromPhoneNumber = req.body.From;
+  const toPhoneNumber = req.body.To;
   executeTwilioMessage(message, phoneNumber, (response) => {
-    twilio.send(response, phoneNumber);
+    sendTwilioMessage(response, fromPhoneNumber, toPhoneNumber, () => {
+      res.status(200);
+      res.json({});
+    });
   })
 });
 
@@ -195,7 +218,7 @@ app.post('/twilio/test', (req, res) => {
   const message = req.body.message;
   const phoneNumber = req.body.phone_number;
   executeTwilioMessage(message, phoneNumber, (response) => {
-    res.json({ response: response });
+    res.send(response);
   })
 });
 

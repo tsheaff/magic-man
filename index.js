@@ -81,8 +81,14 @@ const sendMessageToCohort = (message, cohort, done) => {
       console.log('Error Sending Message: ', err);
       return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
-    // TODO: twilio message send loop
-    done(`Your message was sent to ${_.size(phoneNumbers)} people in cohort ${cohort}`);
+    async.each(phoneNumbers, (phoneNumber, done) => {
+      sendTwilioMessage(message, phoneNumber, process.env.TWILIO_PHONE_NUMBER, done);
+    }, (twilioSendErr) => {
+      if (twilioSendErr) {
+        return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
+      }
+      done(`Your message was SUCCESSFULLY sent to ${_.size(phoneNumbers)} people in cohort ${cohort}`);
+    });
   });
 };
 

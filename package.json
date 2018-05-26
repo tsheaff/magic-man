@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,15 @@
   },
   "homepage": "https://github.com/tsheaff/magic-number#readme",
   "dependencies": {
+    "async": "^2.6.1",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "lodash": "^4.17.10",
+    "moment": "^2.22.1",
+    "moment-timezone": "^0.5.17",
+    "pg": "^7.4.3",
+    "sequelize": "^4.37.10",
+    "shortid": "^2.2.8",
     "twilio": "^3.17.1"
   }
 }

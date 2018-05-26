@@ -145,7 +145,6 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
   const words = fullMessage.split(' ');
-  console.log('words is', words);
   const firstWord = words.shift().toLowerCase().trim();
   const isAdminMessage = firstWord === 'command';
   if (!isAdminMessage) {
@@ -164,23 +163,17 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   adminCommand = adminCommand.toLowerCase().trim();
 
   let cohort = words.shift();
-  console.log('cohort is', cohort);
   if (!cohort) {
     return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');
   }
   cohort = cohort.toLowerCase().trim();
-  console.log('cohort is', cohort);
   const cohortIsValid = cohort === 'all' || cohort.match(/\d\d\d\d\.\d\d\.\d\d/);
-  console.log('cohortIsValid is', cohortIsValid);
-  console.log('includes period is', _.includes(cohort, '.'));
   if (!cohortIsValid) {
     return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must be either "all" or "YYYY.MM.DD" e.g. "2018.05.09"`);
   }
 
   if (adminCommand === 'send') {
     const message = words.join(' ');
-    console.log('message is', message);
-    console.log('url is ', mediaURL);
     return sendMessageToCohort(cohort, message, mediaURL, done);
   }
   if (adminCommand === 'list') {
@@ -196,27 +189,33 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
 };
 
 const sendTwilioMessage = (message, mediaURL, toPhoneNumber, fromPhoneNumber, done) => {
-  twilioClient.messages.create({
+  const options = {
     body: message,
     to: toPhoneNumber,
     from: fromPhoneNumber,
     mediaUrl: mediaURL,
-  }).then((message) => {
-    console.log('Sent Twilio Message', message);
+  };
+  twilioClient.messages.create(options).then((message) => {
+    console.log('Sent Twilio Message', options);
     done();
   }).catch((err) => {
-    console.log('Error Sending Twilio Message', err);
+    console.log('Error Sending Twilio Message', options, err);
     done(err);
   });
 };
 
 // endpoints
 app.post('/twilio/webook', (req, res) => {
-  console.log('twilio webhook body', req.body);
   const message = req.body.Body;
   const fromPhoneNumber = req.body.From;
   const toPhoneNumber = req.body.To;
   const mediaURL = req.body.MediaUrl0;
+  console.log('Received Twilio Message', {
+    message: message,
+    to: toPhoneNumber,
+    from: fromPhoneNumber,
+    mediaURL: mediaURL,
+  });
   executeTwilioMessage(message, fromPhoneNumber, mediaURL, (response) => {
     sendTwilioMessage(response, undefined, fromPhoneNumber, toPhoneNumber, () => {
       res.status(200);

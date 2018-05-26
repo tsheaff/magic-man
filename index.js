@@ -61,10 +61,10 @@ const sendMessageToCohort = (message, cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Sending Message: ', err);
-      return done('There was some sort of problem sending your message to cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
+      return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
     // TODO: twilio message send loop
-    done('Your message was sent to ' + _.size(phoneNumbers) + ' people in cohort ' + cohort);
+    done(`Your message was sent to ${_.size(phoneNumbers)} people in cohort ${cohort}`);
   });
 };
 
@@ -72,9 +72,9 @@ const listCohort = (cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Listing Cohort: ', err);
-      return done('There was some sort of problem listing cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
+      return done(`There was some sort of problem listing cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
-    done('These are the members in cohort ' + cohort + ':\n' + phoneNumbers.join('\n'));
+    done(`These are the members in cohort ${cohort}:\n${phoneNumbers.join('\n')}`);
   });
 };
 
@@ -82,19 +82,23 @@ const countCohort = (cohort, done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Counting Cohort: ', err);
-      return done('There was some sort of problem counting cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
+      return done(`There was some sort of problem counting cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
-    done('There are' + _.size(phoneNumbers) + ' people in cohort ' + cohort);
+    const numPeople = _.size(phoneNumbers);
+    const isPlural = numPeople !== 1;
+    const isOrAre = isPlural ? 'are' : 'is';
+    const personOrPeople = isPlural ? 'people' : 'person';
+    done(`There ${isOrAre} ${numPeople} ${personOrPeople} in cohort ${cohort}`);
   });
 };
 
 const deleteCohort = (cohort, done) => {
   const cohortOptions = cohortSequelizeOptions(cohort);
   Person.destroy(cohortOptions).then((numDestroyed) => {
-    done('All' + numDestroyed + ' people in cohort ' + cohort + ' have been deleted');
+    done(`All ${numDestroyed} people in cohort ${cohort} have been deleted`);
   }).catch((err) => {
     console.log('Error Deleting Cohort: ', err);
-    done('There was some sort of problem deleting cohort ' + cohort + '. ' + CONFIG.COMMAND_ERROR_SUFFIX);
+    done(`There was some sort of problem deleting cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
   });
 };
 
@@ -139,7 +143,7 @@ const executeTwilioMessage = (fullMessage, senderPhoneNumber, done) => {
   }
   const cohortIsValid = cohort === 'ALL' || cohort.match(/\d\d\d\d-\d\d-\d\d/);
   if (!cohortIsValid) {
-    return done('Please give MAGIC MAN a valid cohort. "' + cohort + '" is invalid. Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"');
+    return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "ALL" or like "YYYY-MM-DD" for example "2018-05-09"`);
   }
 
   if (adminCommand === 'SEND') {

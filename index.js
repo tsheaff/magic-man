@@ -151,6 +151,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
   const words = fullMessage.split(' ');
+  console.log('words is', words);
   const firstWord = _.lowerCase(words.shift());
   const isAdminMessage = firstWord === 'command';
   if (!isAdminMessage) {
@@ -168,16 +169,20 @@ const executeTwilioMessage = (fullMessage, phoneNumber, done) => {
   }
 
   const cohort = _.lowerCase(words.shift());
+  console.log('cohort is', cohort);
   if (!cohort) {
     return done('Please give MAGIC MAN a valid command. For example "command count 2018.05.09"');
   }
   const cohortIsValid = cohort === 'all' || cohort.match(/\d\d\d\d\.\d\d\.\d\d/);
+  console.log('cohortIsValid is', cohortIsValid);
+  console.log('includes period is', _.includes(cohort, '.'));
   if (!cohortIsValid) {
     return done(`Please give MAGIC MAN a valid cohort. "${cohort}" is invalid. Cohort must me either "all" or like "YYYY.MM.DD" for example "2018.05.09"`);
   }
 
   if (adminCommand === 'send') {
     const message = words.join(' ');
+    console.log('message is', message);
     return sendMessageToCohort(message, cohort, done);
   }
   if (adminCommand === 'list') {

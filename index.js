@@ -86,6 +86,9 @@ const listCohort = (cohort, done) => {
       console.log('Error Listing Cohort: ', err);
       return done(`There was some sort of problem listing cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
+    if (_.size(phoneNumbers) === 0) {
+      return done(`There are no people in cohort ${cohort}`);
+    }
     done(`These are the members in cohort ${cohort}:\n${phoneNumbers.join('\n')}`);
   });
 };

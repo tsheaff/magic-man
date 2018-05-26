@@ -27,6 +27,7 @@ _.forEach(models, (model) => {
     tableName: model.tableName(),
     paranoid: true,
   });
+  model.sync();
 });
 
 // create express app

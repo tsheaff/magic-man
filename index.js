@@ -152,21 +152,17 @@ const getCohortPhoneNumbers = (cohort, done) => {
   });
 };
 
-const getAliasedMessage = (fullMessage) => {
-  if (fullMessage === 'send' || fullMessage === 's') {
-    const todayCohort = getTodayCohort();
-    return `command send ${todayCohort}`;
-  }
-  return fullMessage;
-}
-
 const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   if (!fullMessage || !phoneNumber) {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
-  const aliasedMessage = getAliasedMessage(fullMessage);
-  const words = aliasedMessage.split(' ');
+  const words = fullMessage.split(' ');
   const firstWord = words.shift().toLowerCase().trim();
+  if (firstWord === 'send' || firstWord === 's') {
+    const todayCohort = getTodayCohort();
+    const remainder = words.join(' ');
+    fullMessage = `command send ${todayCohort} ${remainder}`;
+  }
 
   const secretPassword = process.env.SECRET_PASSWORD; // banana
   const isMemberMessage = firstWord === secretPassword;
@@ -192,7 +188,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
 
   const isAdminMessage = firstWord === 'command';
   if (!isAdminMessage) {
-    const lowerCaseMessage = aliasedMessage.toLowerCase().trim();
+    const lowerCaseMessage = fullMessage.toLowerCase().trim();
     const validEnrollments = CONFIG.VALID_ENROLLMENTS.split(',');
     const isEnrollmentConfirmation = _.includes(validEnrollments, lowerCaseMessage);
     if (isEnrollmentConfirmation) {

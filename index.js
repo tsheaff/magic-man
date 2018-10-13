@@ -163,7 +163,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   const secretPassword = process.env.SECRET_PASSWORD; // banana
   const isMemberMessage = firstWord === secretPassword;
   if (isMemberMessage) {
-    const memberMessageBody = words.shift().join(' ');
+    const memberMessageBody = words.join(' ');
     const cohort = getTodayCohort();
     const sendTheMessage = () => {
       sendMessageToCohort(cohort, memberMessageBody, undefined, done);

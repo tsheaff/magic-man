@@ -89,6 +89,9 @@ const sendMessageToCohort = (cohort, message, mediaURL, isAdmin, excludedPhoneNu
         if (isAdmin) {
           return `Your message was SUCCESSFULLY sent to ${_.size(phoneNumbers)} people in cohort ${cohort}`;
         }
+        if (mediaURL) {
+          return `I’ve sent your image to everyone ✨`
+        }
         return `I’ve sent your message "${message}" to everyone ✨`;
       })());
     });

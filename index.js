@@ -156,11 +156,35 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   if (!fullMessage || !phoneNumber) {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
-  const words = fullMessage.split(' ');
+  const aliasedMessage = getAliasedMessage(fullMessage);
+  const words = aliasedMessage.split(' ');
   const firstWord = words.shift().toLowerCase().trim();
+
+  const secretPassword = process.env.SECRET_PASSWORD; // banana
+  const isMemberMessage = firstWord === secretPassword;
+  if (isMemberMessage) {
+    const memberMessageBody = words.shift().join(' ');
+    const cohort = getTodayCohort();
+    const sendTheMessage = () => {
+      sendMessageToCohort(cohort, memberMessageBody, undefined, done);
+    };
+
+    return getCohortPhoneNumbers(cohort, (err, cohortPhoneNumbers) => {
+      const isInCohort = _.includes(cohortPhoneNumbers, phoneNumber);
+      if (isInCohort) {
+        // if they're already in the cohort, just send it
+        return sendTheMessage();
+      }
+      // if not, enroll them and then send it
+      enrollPersonInTodaysCohort(phoneNumber, () => {
+        sendTheMessage();
+      });
+    });
+  }
+
   const isAdminMessage = firstWord === 'command';
   if (!isAdminMessage) {
-    const lowerCaseMessage = fullMessage.toLowerCase().trim();
+    const lowerCaseMessage = aliasedMessage.toLowerCase().trim();
     const validEnrollments = CONFIG.VALID_ENROLLMENTS.split(',');
     const isEnrollmentConfirmation = _.includes(validEnrollments, lowerCaseMessage);
     if (isEnrollmentConfirmation) {

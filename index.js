@@ -156,12 +156,14 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   if (!fullMessage || !phoneNumber) {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
-  const words = fullMessage.split(' ');
-  const firstWord = words.shift().toLowerCase().trim();
+  let words = fullMessage.split(' ');
+  let firstWord = words.shift().toLowerCase().trim();
   if (firstWord === 'send' || firstWord === 's') {
     const todayCohort = getTodayCohort();
     const remainder = words.join(' ');
     fullMessage = `command send ${todayCohort} ${remainder}`;
+    words = fullMessage.split(' ');
+    firstWord = words.shift().toLowerCase().trim();
   }
 
   const secretPassword = process.env.SECRET_PASSWORD; // banana

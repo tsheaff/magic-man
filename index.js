@@ -172,7 +172,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
     const memberMessageBody = words.join(' ');
     const cohort = getTodayCohort();
     const sendTheMessage = () => {
-      sendMessageToCohort(cohort, memberMessageBody, undefined, false, [phoneNumber], done);
+      sendMessageToCohort(cohort, memberMessageBody, mediaURL, false, [phoneNumber], done);
     };
 
     return getCohortPhoneNumbers(cohort, (err, cohortPhoneNumbers) => {

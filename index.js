@@ -72,7 +72,7 @@ const sendMessageToCohort = (cohort, message, mediaURL, done) => {
       console.log('Error Sending Message: ', err);
       return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
-    async.each(phoneNumbers, (phoneNumber, done) => {
+    async.each(_.uniq(phoneNumbers), (phoneNumber, done) => {
       sendTwilioMessage(message, mediaURL, phoneNumber, process.env.TWILIO_PHONE_NUMBER, done);
     }, (twilioSendErr) => {
       if (twilioSendErr) {

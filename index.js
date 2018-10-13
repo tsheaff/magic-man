@@ -43,6 +43,10 @@ app.set('json spaces', 2);
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
+const getTodayCohort = () => {
+  return moment().tz('America/Los_Angeles').format('YYYY.MM.DD');
+}
+
 // message helpers
 const enrollPersonInTodaysCohort = (phoneNumber, done) => {
   if (!phoneNumber) {
@@ -50,7 +54,7 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
     return done(CONFIG.ENROLLMENT_ERROR);
   }
 
-  const cohort = moment().tz('America/Los_Angeles').format('YYYY.MM.DD');
+  const cohort = getTodayCohort();
   Person.create({
     id: shortid.generate(),
     phone_number: phoneNumber,
@@ -139,6 +143,14 @@ const getCohortPhoneNumbers = (cohort, done) => {
     done(err);
   });
 };
+
+const getAliasedMessage = (fullMessage) => {
+  if (fullMessage === 'send' || fullMessage === 's') {
+    const todayCohort = getTodayCohort();
+    return `command send ${todayCohort}`;
+  }
+  return fullMessage;
+}
 
 const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
   if (!fullMessage || !phoneNumber) {

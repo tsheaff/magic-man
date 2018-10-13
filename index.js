@@ -70,19 +70,27 @@ const enrollPersonInTodaysCohort = (phoneNumber, done) => {
   });
 };
 
-const sendMessageToCohort = (cohort, message, mediaURL, done) => {
+const sendMessageToCohort = (cohort, message, mediaURL, isAdmin, excludedPhoneNumbers = [], done) => {
   getCohortPhoneNumbers(cohort, (err, phoneNumbers) => {
     if (err) {
       console.log('Error Sending Message: ', err);
       return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
     }
-    async.each(_.uniq(phoneNumbers), (phoneNumber, done) => {
+    async.each(phoneNumbers, (phoneNumber, done) => {
+      if (_.includes(excludedPhoneNumbers, phoneNumber)) {
+        return done();
+      }
       sendTwilioMessage(message, mediaURL, phoneNumber, process.env.TWILIO_PHONE_NUMBER, done);
     }, (twilioSendErr) => {
       if (twilioSendErr) {
         return done(`There was some sort of problem sending your message to cohort ${cohort}. ${CONFIG.COMMAND_ERROR_SUFFIX}`);
       }
-      done(`Your message was SUCCESSFULLY sent to ${_.size(phoneNumbers)} people in cohort ${cohort}`);
+      done((() => {
+        if (isAdmin) {
+          return `Your message was SUCCESSFULLY sent to ${_.size(phoneNumbers)} people in cohort ${cohort}`;
+        }
+        return `I’ve sent your message "${message}" to everyone ✨`;
+      })());
     });
   });
 };
@@ -137,7 +145,7 @@ const getCohortPhoneNumbers = (cohort, done) => {
     return { where: { cohort: cohort } };
   })();
   Person.findAll(options).then((people) => {
-    const phoneNumbers = _.sortBy(_.map(people, 'phone_number'));
+    const phoneNumbers = _.uniq(_.sortBy(_.map(people, 'phone_number')));
     done(null, phoneNumbers);
   }).catch((err) => {
     done(err);
@@ -166,7 +174,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
     const memberMessageBody = words.join(' ');
     const cohort = getTodayCohort();
     const sendTheMessage = () => {
-      sendMessageToCohort(cohort, memberMessageBody, undefined, done);
+      sendMessageToCohort(cohort, memberMessageBody, undefined, false, [phoneNumber], done);
     };
 
     return getCohortPhoneNumbers(cohort, (err, cohortPhoneNumbers) => {
@@ -217,7 +225,7 @@ const executeTwilioMessage = (fullMessage, phoneNumber, mediaURL, done) => {
 
   if (adminCommand === 'send') {
     const message = words.join(' ');
-    return sendMessageToCohort(cohort, message, mediaURL, done);
+    return sendMessageToCohort(cohort, message, mediaURL, true, undefined, done);
   }
   if (adminCommand === 'list') {
     return listCohort(cohort, done);
